@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx
+  name: nginx
+  namespace: development
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - image: nginx:1.14.2
+        imagePullPolicy: IfNotPresent
+        name: nginx
+        ports:
+        - containerPort: 80
+          protocol: TCP
+          name: http-web-svc
+        resources: {}
+      nodeSelector:
+        region: local-us
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: development
+spec:
+  selector:
+    app: nginx
+  ports:
+  - name: nginx-http-port
+    protocol: TCP
+    port: 80
+    targetPort: http-web-svc
