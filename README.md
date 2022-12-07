@@ -25,10 +25,17 @@ To setup a cluster with one server (control plane node) and 2 agents (worker nod
 
 ```
 k3d cluster create test \
--a 2 --agents-memory 200MB \
---k3s-arg "--node-taint=node-role.kubernetes.io/master:NoSchedule@server:0" \
+-a 2 --agents-memory 500MB \
+--k3s-arg "--cluster-init@server:0" \
+--k3s-arg "--node-taint=CriticalAddonsOnly=true:NoExecute@server:0" \
 --k3s-node-label "region=local-us@agent:0" \
 --k3s-node-label "region=local-eu@agent:1"
 
 ```
+
+### Deploying application
+
+
+
+
 
