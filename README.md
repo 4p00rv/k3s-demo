@@ -33,9 +33,21 @@ k3d cluster create test \
 
 ```
 
+
+
+To access services within the cluster from host machine we need to expose the Traefik loadbalancer:
+
+```
+k3d node edit k3d-test-serverlb --port-add 127.0.0.1:8080:80
+```
+
 ### Deploying application
 
 
 
+Deploy a Nginx application using:
 
+```
+kubectl apply -f nginx-deploy.yaml
+```
 
