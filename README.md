@@ -29,8 +29,9 @@ k3d cluster create test \
 --k3s-arg "--cluster-init@server:0" \
 --k3s-arg "--node-taint=CriticalAddonsOnly=true:NoExecute@server:0" \
 --k3s-node-label "region=local-us@agent:0" \
---k3s-node-label "region=local-eu@agent:1"
-
+--k3s-node-label "region=local-eu@agent:1" \
+--k3s-arg "--kube-controller-manager-arg=--node-monitor-grace-period=10s@server:0" \
+--k3s-arg "--kubelet-arg=--node-status-update-frequency=2s@agent:0;agent:1"
 ```
 
 
@@ -40,6 +41,10 @@ To access services within the cluster from host machine we need to expose the Tr
 ```
 k3d node edit k3d-test-serverlb --port-add 127.0.0.1:8080:80
 ```
+
+
+
+
 
 ### Deploying application
 
@@ -51,3 +56,4 @@ Deploy a Nginx application using:
 kubectl apply -f nginx-deploy.yaml
 ```
 
+****
