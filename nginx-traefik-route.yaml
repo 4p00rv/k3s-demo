@@ -1,0 +1,31 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nginx
+  namespace: development
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/nginx`)
+      middlewares:
+        - name: nginx-middleware
+          namespace: development
+      services:
+        - kind: Service
+          name: nginx-service
+          namespace: development
+          port: 8080
+
+---
+# Replace the path with /foo
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: nginx-middleware
+  namespace: development
+spec:
+  replacePathRegex:
+    regex: ^/nginx/?(.*)
+    replacement: /$1
