@@ -5,7 +5,7 @@ metadata:
   namespace: development
 spec:
   entryPoints:
-    - web
+    - websecure
   routes:
     - kind: Rule
       match: PathPrefix(`/nginx`)

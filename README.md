@@ -31,7 +31,8 @@ k3d cluster create test \
 --k3s-node-label "region=local-us@agent:0" \
 --k3s-node-label "region=local-eu@agent:1" \
 --k3s-arg "--kube-controller-manager-arg=--node-monitor-grace-period=10s@server:0" \
---k3s-arg "--kubelet-arg=--node-status-update-frequency=2s@agent:0;agent:1"
+--k3s-arg "--kubelet-arg=--node-status-update-frequency=2s@agent:0;agent:1" \
+--api-port 127.0.0.1:6544 -p 127.0.0.1:80:80@server -p 127.0.0.1:443:443@server
 ```
 
 
@@ -41,8 +42,6 @@ To access services within the cluster from host machine we need to expose the Tr
 ```
 k3d node edit k3d-test-serverlb --port-add 127.0.0.1:8080:80
 ```
-
-
 
 
 
@@ -56,4 +55,32 @@ Deploy a Nginx application using:
 kubectl apply -f nginx-deploy.yaml
 ```
 
+Let's check out the service ` curl -k https://localhost/nginx`
+
 ****
+
+Let's see where it is learning. First we describe the pod and see its attributes:
+
+```
+kubectl describe pod -n development nginx
+```
+
+Based on the `nodeSelectors` we can lookup the node that is running the pod
+
+```
+kubectl get no -l region=local-us
+```
+
+Let's try crash the node
+```
+k3d node stop k3d-test-agent-0
+```
+
+If we try to access nginx now it gives an error
+
+To fix this we just add another node to the cluster with the same labels and let K8s take care of it.
+
+```
+k3d node create worker -c test --k3s-node-label "region=local-us"
+```
+
