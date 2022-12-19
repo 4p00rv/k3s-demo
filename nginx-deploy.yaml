@@ -11,7 +11,7 @@ metadata:
   name: nginx
   namespace: development
 spec:
-  replicas: 4
+  replicas: 1
   selector:
     matchLabels:
       app: nginx
