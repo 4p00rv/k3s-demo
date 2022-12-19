@@ -1,0 +1,31 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: grafana
+  namespace: grafana
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/grafana`)
+      middlewares:
+        - name: grafana-middleware
+          namespace: grafana
+      services:
+        - kind: Service
+          name: grafana
+          namespace: grafana
+          port: 80
+
+---
+# Replace the path with /foo
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: grafana-middleware
+  namespace: grafana
+spec:
+  replacePathRegex:
+    regex: ^/grafana/?(.*)
+    replacement: /$1

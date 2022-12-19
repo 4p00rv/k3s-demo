@@ -19,10 +19,13 @@ spec:
     metadata:
       labels:
         app: nginx
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9113'
     spec:
       topologySpreadConstraints:
       - maxSkew: 1
-        topologyKey: node
+        topologyKey: region
         whenUnsatisfiable: DoNotSchedule
         labelSelector:
           matchLabels:
@@ -35,9 +38,30 @@ spec:
         - containerPort: 80
           protocol: TCP
           name: http-web-svc
-        resources: {}
-      nodeSelector:
-        region: local-us
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "100Mi"
+          limits:
+            cpu: "100m"
+            memory: "100Mi"
+        volumeMounts:
+        - mountPath: /etc/nginx/conf.d # mount nginx-conf volumn to /etc/nginx
+          readOnly: true
+          name: nginx
+      - name: nginx-exporter
+        image: 'nginx/nginx-prometheus-exporter:0.10.0'
+        args:
+          - '-nginx.scrape-uri=http://localhost/nginx_status'
+        ports:
+          - containerPort: 9113
+      volumes:
+      - name: nginx
+        configMap:
+          name: nginx
+          items:
+            - key: default.conf
+              path: default.conf
       tolerations:
         - effect: NoExecute
           key: node.kubernetes.io/not-ready
@@ -61,3 +85,34 @@ spec:
     protocol: TCP
     port: 8080
     targetPort: http-web-svc
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx
+  namespace: development
+data:
+  default.conf: |
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   /usr/share/nginx/html;
+            index  index.html index.htm;
+        }
+
+        #error_page  404              /404.html;
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   /usr/share/nginx/html;
+        }
+        
+        location /nginx_status {
+            stub_status;
+            allow 127.0.0.1;	#only allow requests from localhost
+            deny all;		#deny all other hosts
+        }
+
+    }
